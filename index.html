@@ -1,7 +1,191 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Persediaan Barang | PT Eclo Mega Nusantara</title><style>
-:root{font-family:Arial,sans-serif;color:#172b4d;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:#0758c9;color:white}button.secondary{background:#e7effb;color:#123c79}button.danger{background:#d93443}.login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}.hero{background:linear-gradient(145deg,#073b84,#071c42);color:white;padding:12%;display:flex;flex-direction:column;justify-content:center}.hero h1{font-size:42px}.loginform{display:flex;justify-content:center;align-items:center;padding:30px}.panel{background:white;padding:30px;border-radius:16px;box-shadow:0 6px 28px #16345a15;width:100%;max-width:450px}.field{display:flex;flex-direction:column;gap:6px;margin:12px 0}input,select{padding:11px;border:1px solid #cbd5e1;border-radius:8px;width:100%;background:white}.app{display:none;min-height:100vh}.sidebar{background:#082f6d;color:white;width:235px;padding:22px 14px;flex-shrink:0}.sidebar h3{padding:0 12px;line-height:1.4}.nav{width:100%;display:block;text-align:left;background:transparent;margin:5px 0}.nav.active,.nav:hover{background:#1164d8}.main{flex:1;min-width:0}.top{background:white;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e3e9f1}.content{padding:30px;max-width:1300px;margin:auto}.cards{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:16px}.card{background:white;border-radius:12px;padding:20px;box-shadow:0 3px 16px #12284a10}.card strong{font-size:30px;display:block;margin-top:12px;color:#0758c9}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}.toolbar input{max-width:320px}.tablewrap{overflow-x:auto;background:white;border-radius:12px}table{width:100%;border-collapse:collapse}th,td{padding:13px;text-align:left;border-bottom:1px solid #e7ecf3;white-space:nowrap}th{background:#edf3fb}.small{padding:6px 9px;font-size:13px;margin-right:4px}.muted{color:#61738a}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.notice{padding:12px;border-radius:8px;background:#e8f7ec;color:#176d31;margin:14px 0}.hidden{display:none!important}@media(max-width:800px){.login{grid-template-columns:1fr}.hero{padding:25px}.hero h1{font-size:28px}.app{flex-direction:column}.sidebar{width:100%}.cards,.grid2,.formgrid{grid-template-columns:1fr}.top,.content{padding:16px}}
-</style></head><body><section class="login" id="login"><div class="hero"><h1>PT Eclo Mega Nusantara</h1><h2>Sistem Informasi Manajemen Persediaan Barang</h2><p>Prototype interaktif UI/UX • DUX-6</p></div><div class="loginform"><div class="panel"><h2>Masuk ke Sistem</h2><p class="muted">Demo: masukkan username dan password apa saja.</p><form id="loginForm"><label class="field">Username<input required id="username" placeholder="Username"></label><label class="field">Password<input required type="password" placeholder="Password"></label><button style="width:100%">Masuk</button></form></div></div></section><div class="app" id="app"><aside class="sidebar"><h3>◈ PT Eclo Mega Nusantara</h3><button class="nav active" data-page="dashboard">⌂ Dashboard</button><button class="nav" data-page="barang">▤ Data Barang</button><button class="nav" data-page="masuk">↥ Barang Masuk</button><button class="nav" data-page="keluar">↧ Barang Keluar</button><button class="nav" data-page="laporan">▣ Laporan Persediaan</button><button class="nav" id="logout">Keluar</button></aside><div class="main"><header class="top"><b id="pageTitle">Dashboard</b><span>Admin Demo • PT Eclo Mega Nusantara</span></header><main class="content"><div id="notice"></div><div id="view"></div></main></div></div><script>
-const seed=[{code:'BRG-001',name:'Kertas A4',cat:'ATK',stock:120,unit:'Rim'},{code:'BRG-002',name:'Tinta Printer',cat:'ATK',stock:35,unit:'Pcs'},{code:'BRG-003',name:'Mouse',cat:'Perangkat IT',stock:28,unit:'Pcs'},{code:'BRG-004',name:'Keyboard',cat:'Perangkat IT',stock:24,unit:'Pcs'},{code:'BRG-005',name:'Monitor',cat:'Perangkat IT',stock:15,unit:'Unit'}];let items=JSON.parse(localStorage.getItem('dux6_items')||'null')||seed;let history=JSON.parse(localStorage.getItem('dux6_history')||'[]');let page='dashboard';const $=id=>document.getElementById(id);function persist(){localStorage.setItem('dux6_items',JSON.stringify(items));localStorage.setItem('dux6_history',JSON.stringify(history))}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function notify(s){$('notice').innerHTML='<div class="notice">'+esc(s)+'</div>';setTimeout(()=>$('notice').innerHTML='',3500)}function nav(p){page=p;document.querySelectorAll('.nav[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));$('pageTitle').textContent={dashboard:'Dashboard',barang:'Data Barang',masuk:'Barang Masuk',keluar:'Barang Keluar',laporan:'Laporan Persediaan'}[p];render()};document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>nav(b.dataset.page));$('loginForm').onsubmit=e=>{e.preventDefault();$('login').style.display='none';$('app').style.display='flex';nav('dashboard')};$('logout').onclick=()=>{$('app').style.display='none';$('login').style.display='grid'};function table(rows,heads){return '<div class="tablewrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>'}function render(){let total=items.reduce((a,x)=>a+x.stock,0), ins=history.filter(x=>x.type==='Masuk').reduce((a,x)=>a+x.qty,0),outs=history.filter(x=>x.type==='Keluar').reduce((a,x)=>a+x.qty,0);if(page==='dashboard'){$('view').innerHTML='<h1>Selamat datang di Dashboard</h1><p class="muted">Ringkasan data prototype persediaan barang</p><div class="cards">'+[['Jenis Barang',items.length],['Total Stok',total],['Barang Masuk',ins],['Barang Keluar',outs]].map(x=>'<div class="card">'+x[0]+'<strong>'+x[1]+'</strong></div>').join('')+'</div><div class="card" style="margin-top:20px"><h3>Stok Menipis (≤ 10)</h3>'+(items.filter(x=>x.stock<=10).map(x=>'<p>'+esc(x.name)+' — '+x.stock+'</p>').join('')||'<p class="muted">Tidak ada stok menipis.</p>')+'</div>'}if(page==='barang')renderBarang();if(page==='masuk'||page==='keluar')renderTransaksi();if(page==='laporan')renderLaporan()}
-function renderBarang(){let q=window.searchQuery||'';let rows=items.filter(x=>(x.name+' '+x.code).toLowerCase().includes(q.toLowerCase())).map(x=>'<tr><td>'+esc(x.code)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.cat)+'</td><td>'+x.stock+'</td><td>'+esc(x.unit)+'</td><td><button class="small secondary" onclick="editBarang(\''+esc(x.code)+'\')">Edit</button><button class="small danger" onclick="deleteBarang(\''+esc(x.code)+'\')">Hapus</button></td></tr>');$('view').innerHTML='<h1>Data Barang</h1><div class="toolbar"><input id="search" placeholder="Cari nama atau kode barang..." value="'+esc(q)+'"><button onclick="editBarang()">+ Tambah Barang</button></div><div id="editor"></div>'+table(rows,['Kode','Nama Barang','Kategori','Stok','Satuan','Aksi']);$('search').oninput=e=>{window.searchQuery=e.target.value;renderBarang();$('search').focus();$('search').setSelectionRange(window.searchQuery.length,window.searchQuery.length)}}window.deleteBarang=code=>{if(confirm('Hapus barang '+code+'?')){items=items.filter(x=>x.code!==code);persist();renderBarang();notify('Barang dihapus')}};window.editBarang=code=>{let x=items.find(a=>a.code===code)||{code:'',name:'',cat:'ATK',stock:0,unit:'Pcs'};$('editor').innerHTML='<div class="card"><h3>'+(code?'Edit':'Tambah')+' Barang</h3><form id="itemForm" class="formgrid"><label class="field">Kode<input name="code" required '+(code?'readonly':'')+' value="'+esc(x.code)+'"></label><label class="field">Nama Barang<input name="name" required value="'+esc(x.name)+'"></label><label class="field">Kategori<input name="cat" required value="'+esc(x.cat)+'"></label><label class="field">Stok<input name="stock" type="number" min="0" required value="'+x.stock+'"></label><label class="field">Satuan<input name="unit" required value="'+esc(x.unit)+'"></label><div class="toolbar"><button>Simpan</button><button type="button" class="secondary" onclick="renderBarang()">Batal</button></div></form></div>';$('itemForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),v={code:f.get('code').trim(),name:f.get('name').trim(),cat:f.get('cat').trim(),stock:Number(f.get('stock')),unit:f.get('unit').trim()};if(!code&&items.some(a=>a.code===v.code))return alert('Kode barang sudah ada');if(code)items=items.map(a=>a.code===code?v:a);else items.push(v);persist();renderBarang();notify('Data barang disimpan')}};
-function renderTransaksi(){let incoming=page==='masuk',kind=incoming?'Masuk':'Keluar',options=items.map(x=>'<option value="'+esc(x.code)+'">'+esc(x.code)+' — '+esc(x.name)+' (stok '+x.stock+')</option>').join('');$('view').innerHTML='<h1>Barang '+kind+'</h1><div class="card"><h3>Tambah Transaksi Barang '+kind+'</h3><form id="txForm" class="formgrid"><label class="field">Tanggal<input type="date" name="date" required value="'+new Date().toISOString().slice(0,10)+'"></label><label class="field">'+(incoming?'Pemasok':'Tujuan / Pengguna')+'<input name="party" required placeholder="'+(incoming?'Nama pemasok':'Nama tujuan')+'"></label><label class="field">Kode Barang<select name="code" required>'+options+'</select></label><label class="field">Jumlah<input name="qty" type="number" min="1" required></label><div><button>Simpan Transaksi</button></div></form></div><h3>Riwayat Barang '+kind+'</h3>'+table(history.filter(x=>x.type===kind).map(x=>'<tr><td>'+esc(x.date)+'</td><td>'+esc(x.code)+'</td><td>'+x.qty+'</td><td>'+esc(x.party)+'</td></tr>'),['Tanggal','Kode Barang','Jumlah',incoming?'Pemasok':'Tujuan']);$('txForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),code=f.get('code'),qty=Number(f.get('qty')),item=items.find(x=>x.code===code);if(!item)return alert('Pilih barang');if(!incoming&&item.stock<qty)return alert('Stok tidak mencukupi');item.stock+=incoming?qty:-qty;history.unshift({type:kind,date:f.get('date'),code,qty,party:f.get('party')});persist();renderTransaksi();notify('Transaksi tersimpan (data simulasi)')}}function renderLaporan(){let rows=items.map(x=>'<tr><td>'+esc(x.code)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.cat)+'</td><td>'+x.stock+'</td><td>'+esc(x.unit)+'</td></tr>');$('view').innerHTML='<h1>Laporan Persediaan</h1><p class="muted">Laporan stok terkini dari data simulasi.</p><div class="toolbar"><button onclick="exportCSV()">Ekspor CSV</button><button class="secondary" onclick="window.print()">Cetak / Simpan PDF</button></div>'+table(rows,['Kode','Nama Barang','Kategori','Stok Akhir','Satuan'])}window.exportCSV=()=>{let csv=[['Kode','Nama Barang','Kategori','Stok','Satuan'],...items.map(x=>[x.code,x.name,x.cat,x.stock,x.unit])].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='laporan-persediaan.csv';a.click();URL.revokeObjectURL(a.href)};
-</script></body></html>
+<!DOCTYPE html>
+<html lang="id">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Persediaan Barang | PT Eclo Mega Nusantara
+  </title>
+  <style>
+   :root { font-family: 'Segoe UI', system-ui, sans-serif; color: #e9eff8; background: #090e18; color-scheme: dark; --accent: #2dd4bf; --gold: #d6b477; }
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 14px; }
+button, input, select { font: inherit; }
+button { cursor: pointer; border: 1px solid transparent; border-radius: 10px; padding: 12px 17px; background: #2dd4bf; color: #072a29; font-weight: 700; transition: transform .2s, box-shadow .2s, background .2s; }
+button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px #2dd4bf25; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #5eead4; outline-offset: 3px; }
+button.secondary { background: #203449; color: #a5e8e2; border-color: #355167; }
+button.danger { background: #402634; color: #ffb3bf; border-color: #633747; }
+.login { min-height: 100vh; display: grid; grid-template-columns: 1.15fr 1fr; position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 18% 30%, #123c43, transparent 50%), radial-gradient(ellipse at 90% 80%, #29253d, transparent 45%), #090e18; }
+.login::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(#a5f3fc09 1px, transparent 1px), linear-gradient(90deg,#a5f3fc09 1px,transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(120deg,black,transparent); }
+.login::after { content: ''; position: absolute; width: 520px; height: 520px; border-radius: 50%; background: #2dd4bf15; filter: blur(85px); top: -200px; right: 5%; z-index: -1; animation: glow 9s ease-in-out infinite alternate; }
+@keyframes glow { to { transform: translate(-140px,230px) scale(1.3); } }
+.hero { padding: 10%; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.hero::before { content: '◈'; display: grid; place-items: center; width: 74px; height: 74px; border-radius: 23px; border: 1px solid #5eead45c; background: #2dd4bf14; color: #5eead4; font-size: 48px; margin-bottom: 38px; box-shadow: 0 0 40px #2dd4bf20; }
+.hero h1 { font-size: clamp(36px,5vw,76px); line-height: 1.02; letter-spacing: -3px; margin: 0; max-width: 650px; }
+.hero h2 { font-size: clamp(18px,2vw,26px); font-weight: 400; color: #a8dcd7; line-height: 1.5; max-width: 470px; }
+.hero p { color: #d6b477; letter-spacing: .06em; }
+.loginform { display: grid; place-items: center; padding: 36px; }
+.panel { width: 100%; max-width: 440px; padding: 42px; border: 1px solid #ffffff24; border-radius: 28px; background: linear-gradient(145deg,#25364b99,#101a2ad9); backdrop-filter: blur(20px); box-shadow: 0 30px 100px #0007, inset 0 1px #ffffff12; }
+.panel h2 { font-size: 30px; margin: 0 0 12px; letter-spacing: -1px; }
+.panel p { line-height: 1.6; margin-bottom: 28px; }
+.field { display: flex; flex-direction: column; gap: 9px; margin: 14px 0; font-weight: 600; color: #c4d2e5; }
+input, select { width: 100%; min-width: 0; padding: 13px; border-radius: 10px; border: 1px solid #34465d; background: #0d1726; color: #eef5ff; }
+input::placeholder { color: #8294ad; }
+.panel button { margin-top: 16px; padding: 15px; }
+.app { display: none; min-height: 100vh; background: radial-gradient(ellipse at 85% 0%,#142d3a,transparent 50%),#0b1220; }
+.sidebar { width: 260px; flex-shrink: 0; padding: 28px 16px; background: #101a29; border-right: 1px solid #26364a; min-height: 100vh; }
+.sidebar h3 { color: #f1f5f9; font-size: 18px; line-height: 1.5; padding: 8px 12px 26px; margin: 0 0 24px; border-bottom: 1px solid #304157; }
+.nav { display: block; width: 100%; text-align: left; background: transparent; color: #aebed3; margin: 7px 0; padding: 15px; font-weight: 600; }
+.nav.active { color: #6ce9d6; background: linear-gradient(90deg,#214d50,#183039); border-color: #316063; box-shadow: inset 3px 0 #2dd4bf; }
+.nav:hover { background: #203246; }
+#logout { margin-top: 36px; color: #f3b5bd; border-color: #493345; }
+.main { flex: 1; min-width: 0; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 23px 32px; background: #101a29d9; border-bottom: 1px solid #26364a; }
+.top b { font-size: 18px; }
+.top span { border: 1px solid #344a5d; border-radius: 30px; padding: 9px 14px; color: #b9d7df; font-size: 12px; }
+.content { max-width: 1440px; padding: 36px; margin: auto; }
+h1 { font-size: 32px; letter-spacing: -1px; margin: 0 0 10px; }
+h3 { font-size: 17px; margin: 22px 0 16px; }
+.muted { color: #a1b2c9; }
+.cards { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; margin-top: 30px; }
+.card { padding: 25px; border: 1px solid #2d4055; border-radius: 20px; background: linear-gradient(145deg,#1b2b40,#121d2e); box-shadow: 0 12px 32px #0002; }
+.card h3 { margin-top: 0; }
+.cards .card { --tone: #5eead4; position: relative; overflow: hidden; color: #c2d0e2; border-top: 2px solid var(--tone); }
+.cards .card::before { content: '▦'; display: grid; place-items: center; width: 44px; height: 44px; background: #ffffff0b; border: 1px solid #ffffff15; border-radius: 13px; font-size: 25px; color: var(--tone); margin-bottom: 24px; }
+.cards .card::after { content: ''; position: absolute; width: 120px; height: 120px; border: 1px solid var(--tone); opacity: .12; border-radius: 30px; transform: rotate(35deg); right: -65px; top: -65px; }
+.cards .card:nth-child(2) { --tone: #a5b4fc; }
+.cards .card:nth-child(2)::before { content: '◈'; }
+.cards .card:nth-child(3) { --tone: #86efac; }
+.cards .card:nth-child(3)::before { content: '↙'; }
+.cards .card:nth-child(4) { --tone: #f3c781; }
+.cards .card:nth-child(4)::before { content: '↗'; }
+.card strong { display: block; font-size: 40px; margin-top: 10px; color: var(--tone,#eef5ff); letter-spacing: -1px; }
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0; }
+.toolbar input { max-width: 350px; }
+.tablewrap { overflow-x: auto; border: 1px solid #2d4055; border-radius: 17px; background: #131f30; }
+table { width: 100%; border-collapse: collapse; }
+th,td { text-align: left; padding: 17px; border-bottom: 1px solid #29394d; white-space: nowrap; }
+th { background: #213249; color: #c5d5e9; text-transform: uppercase; font-size: 11px; letter-spacing: .08em; }
+tbody tr:nth-child(even) { background: #172437; }
+tbody tr:hover { background: #20374a; }
+.small { font-size: 12px; padding: 8px 12px; margin-right: 5px; }
+.formgrid,.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.formgrid .field { margin: 5px 0; }
+.formgrid .toolbar { align-self: end; margin: 0; }
+.notice { background: #173d39; border: 1px solid #33786b; color: #a7f3d0; border-radius: 12px; padding: 14px; margin-bottom: 18px; }
+#editor:not(:empty) { margin-bottom: 20px; }
+.hidden { display: none!important; }
+@media (max-width: 1050px) { .cards { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 800px) { .login { grid-template-columns: 1fr; } .hero { padding: 30px; } .hero h1 { font-size: 36px; letter-spacing: -1px; } .hero::before { width: 48px; height: 48px; font-size: 30px; margin-bottom: 15px; } .loginform { padding: 20px; } .panel { padding: 25px; } .app { flex-direction: column; } .sidebar { width: 100%; min-height: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 5px; padding: 14px; } .sidebar h3 { grid-column: 1/-1; padding: 0 8px 12px; margin: 0; } .nav,#logout { margin: 0; font-size: 13px; } .top,.content { padding: 16px; } .top span { max-width: 55%; } .cards { gap: 10px; } .card { padding: 16px; } .formgrid,.grid2 { grid-template-columns: 1fr; } h1 { font-size: 25px; } }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation: none!important; transition: none!important; } }
+@media print { :root { color-scheme: light; } .sidebar,.top,.toolbar { display: none!important; } .app,.content,.tablewrap,th,td,tbody tr:nth-child(even) { background: white!important; color: black!important; } .content { padding: 0; } }
+  </style>
+ </head>
+ <body>
+  <section class="login" id="login">
+   <div class="hero">
+    <h1>
+     PT Eclo Mega Nusantara
+    </h1>
+    <h2>
+     Sistem Informasi Manajemen Persediaan Barang
+    </h2>
+    <p>
+     Manajemen persediaan dalam satu sistem
+    </p>
+   </div>
+   <div class="loginform">
+    <div class="panel">
+     <h2>
+      Masuk ke Sistem
+     </h2>
+     <p class="muted">
+      Masukkan username dan password untuk melanjutkan.
+     </p>
+     <form id="loginForm">
+      <label class="field">
+       Username
+       <input id="username" placeholder="Username" required=""/>
+      </label>
+      <label class="field">
+       Password
+       <input placeholder="Password" required="" type="password"/>
+      </label>
+      <button style="width:100%">
+       Masuk
+      </button>
+     </form>
+    </div>
+   </div>
+  </section>
+  <div class="app" id="app">
+   <aside class="sidebar">
+    <h3>
+     ◈ PT Eclo Mega Nusantara
+    </h3>
+    <button class="nav active" data-page="dashboard">
+     ⌂ Dashboard
+    </button>
+    <button class="nav" data-page="barang">
+     ▤ Data Barang
+    </button>
+    <button class="nav" data-page="masuk">
+     ↥ Barang Masuk
+    </button>
+    <button class="nav" data-page="keluar">
+     ↧ Barang Keluar
+    </button>
+    <button class="nav" data-page="laporan">
+     ▣ Laporan Persediaan
+    </button>
+    <button class="nav" id="logout">
+     Keluar
+    </button>
+   </aside>
+   <div class="main">
+    <header class="top">
+     <b id="pageTitle">
+      Dashboard
+     </b>
+     <span>
+      Admin • PT Eclo Mega Nusantara
+     </span>
+    </header>
+    <main class="content">
+     <div id="notice">
+     </div>
+     <div id="view">
+     </div>
+    </main>
+   </div>
+  </div>
+  <script>
+   const seed=[{code:'BRG-001',name:'Kertas A4',cat:'ATK',stock:120,unit:'Rim'},{code:'BRG-002',name:'Tinta Printer',cat:'ATK',stock:35,unit:'Pcs'},{code:'BRG-003',name:'Mouse',cat:'Perangkat IT',stock:28,unit:'Pcs'},{code:'BRG-004',name:'Keyboard',cat:'Perangkat IT',stock:24,unit:'Pcs'},{code:'BRG-005',name:'Monitor',cat:'Perangkat IT',stock:15,unit:'Unit'}];
+let items=JSON.parse(localStorage.getItem('dux6_items')||'null')||seed;
+let history=JSON.parse(localStorage.getItem('dux6_history')||'[]');
+let page='dashboard';
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem('dux6_items',JSON.stringify(items));localStorage.setItem('dux6_history',JSON.stringify(history))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function notify(s){$('notice').innerHTML='<div class="notice">'+esc(s)+'</div>';setTimeout(()=>$('notice').innerHTML='',3500)}
+function nav(p){page=p;
+document.querySelectorAll('.nav[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));$('pageTitle').textContent={dashboard:'Dashboard',barang:'Data Barang',masuk:'Barang Masuk',keluar:'Barang Keluar',laporan:'Laporan Persediaan'}[p];render()};
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>nav(b.dataset.page));
+$('loginForm').onsubmit=e=>{e.preventDefault();$('login').style.display='none';$('app').style.display='flex';nav('dashboard')};
+$('logout').onclick=()=>{$('app').style.display='none';$('login').style.display='grid'};
+function table(rows,heads){return '<div class="tablewrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>'}
+function render(){let total=items.reduce((a,x)=>a+x.stock,0), ins=history.filter(x=>x.type==='Masuk').reduce((a,x)=>a+x.qty,0),outs=history.filter(x=>x.type==='Keluar').reduce((a,x)=>a+x.qty,0);if(page==='dashboard'){$('view').innerHTML='<h1>Selamat datang di Dashboard</h1><p class="muted">Ringkasan data persediaan barang</p><div class="cards">'+[['Jenis Barang',items.length],['Total Stok',total],['Barang Masuk',ins],['Barang Keluar',outs]].map(x=>'<div class="card">'+x[0]+'<strong>'+x[1]+'</strong></div>').join('')+'</div><div class="card" style="margin-top:20px"><h3>Stok Menipis (≤ 10)</h3>'+(items.filter(x=>x.stock<=10).map(x=>'<p>'+esc(x.name)+' — '+x.stock+'</p>').join('')||'<p class="muted">Tidak ada stok menipis.</p>')+'</div>'}if(page==='barang')renderBarang();if(page==='masuk'||page==='keluar')renderTransaksi();if(page==='laporan')renderLaporan()}
+
+function renderBarang(){let q=window.searchQuery||'';
+let rows=items.filter(x=>(x.name+' '+x.code).toLowerCase().includes(q.toLowerCase())).map(x=>'<tr><td>'+esc(x.code)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.cat)+'</td><td>'+x.stock+'</td><td>'+esc(x.unit)+'</td><td><button class="small secondary" onclick="editBarang(\''+esc(x.code)+'\')">Edit</button><button class="small danger" onclick="deleteBarang(\''+esc(x.code)+'\')">Hapus</button></td></tr>');$('view').innerHTML='<h1>Data Barang</h1><div class="toolbar"><input id="search" placeholder="Cari nama atau kode barang..." value="'+esc(q)+'"><button onclick="editBarang()">+ Tambah Barang</button></div><div id="editor"></div>'+table(rows,['Kode','Nama Barang','Kategori','Stok','Satuan','Aksi']);$('search').oninput=e=>{window.searchQuery=e.target.value;renderBarang();$('search').focus();$('search').setSelectionRange(window.searchQuery.length,window.searchQuery.length)}}window.deleteBarang=code=>{if(confirm('Hapus barang '+code+'?')){items=items.filter(x=>x.code!==code);persist();renderBarang();notify('Barang dihapus')}};
+window.editBarang=code=>{let x=items.find(a=>a.code===code)||{code:'',name:'',cat:'ATK',stock:0,unit:'Pcs'};$('editor').innerHTML='<div class="card"><h3>'+(code?'Edit':'Tambah')+' Barang</h3><form id="itemForm" class="formgrid"><label class="field">Kode<input name="code" required '+(code?'readonly':'')+' value="'+esc(x.code)+'"></label><label class="field">Nama Barang<input name="name" required value="'+esc(x.name)+'"></label><label class="field">Kategori<input name="cat" required value="'+esc(x.cat)+'"></label><label class="field">Stok<input name="stock" type="number" min="0" required value="'+x.stock+'"></label><label class="field">Satuan<input name="unit" required value="'+esc(x.unit)+'"></label><div class="toolbar"><button>Simpan</button><button type="button" class="secondary" onclick="renderBarang()">Batal</button></div></form></div>';$('itemForm').onsubmit=e=>{e.preventDefault();
+let f=new FormData(e.target),v={code:f.get('code').trim(),name:f.get('name').trim(),cat:f.get('cat').trim(),stock:Number(f.get('stock')),unit:f.get('unit').trim()};if(!code&&items.some(a=>a.code===v.code))return alert('Kode barang sudah ada');if(code)items=items.map(a=>a.code===code?v:a);else items.push(v);persist();renderBarang();notify('Data barang disimpan')}};
+
+function renderTransaksi(){let incoming=page==='masuk',kind=incoming?'Masuk':'Keluar',options=items.map(x=>'<option value="'+esc(x.code)+'">'+esc(x.code)+' — '+esc(x.name)+' (stok '+x.stock+')</option>').join('');$('view').innerHTML='<h1>Barang '+kind+'</h1><div class="card"><h3>Tambah Transaksi Barang '+kind+'</h3><form id="txForm" class="formgrid"><label class="field">Tanggal<input type="date" name="date" required value="'+new Date().toISOString().slice(0,10)+'"></label><label class="field">'+(incoming?'Pemasok':'Tujuan / Pengguna')+'<input name="party" required placeholder="'+(incoming?'Nama pemasok':'Nama tujuan')+'"></label><label class="field">Kode Barang<select name="code" required>'+options+'</select></label><label class="field">Jumlah<input name="qty" type="number" min="1" required></label><div><button>Simpan Transaksi</button></div></form></div><h3>Riwayat Barang '+kind+'</h3>'+table(history.filter(x=>x.type===kind).map(x=>'<tr><td>'+esc(x.date)+'</td><td>'+esc(x.code)+'</td><td>'+x.qty+'</td><td>'+esc(x.party)+'</td></tr>'),['Tanggal','Kode Barang','Jumlah',incoming?'Pemasok':'Tujuan']);$('txForm').onsubmit=e=>{e.preventDefault();
+let f=new FormData(e.target),code=f.get('code'),qty=Number(f.get('qty')),item=items.find(x=>x.code===code);if(!item)return alert('Pilih barang');if(!incoming&&item.stock<qty)return alert('Stok tidak mencukupi');item.stock+=incoming?qty:-qty;history.unshift({type:kind,date:f.get('date'),code,qty,party:f.get('party')});persist();renderTransaksi();notify('Transaksi tersimpan (data simulasi)')}}
+function renderLaporan(){let rows=items.map(x=>'<tr><td>'+esc(x.code)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.cat)+'</td><td>'+x.stock+'</td><td>'+esc(x.unit)+'</td></tr>');$('view').innerHTML='<h1>Laporan Persediaan</h1><p class="muted">Laporan stok terkini dari data simulasi.</p><div class="toolbar"><button onclick="exportCSV()">Ekspor CSV</button><button class="secondary" onclick="window.print()">Cetak / Simpan PDF</button></div>'+table(rows,['Kode','Nama Barang','Kategori','Stok Akhir','Satuan'])}window.exportCSV=()=>{let csv=[['Kode','Nama Barang','Kategori','Stok','Satuan'],...items.map(x=>[x.code,x.name,x.cat,x.stock,x.unit])].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='laporan-persediaan.csv';a.click();URL.revokeObjectURL(a.href)};
+  </script>
+ </body>
+</html>
